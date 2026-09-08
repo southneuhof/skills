@@ -47,7 +47,14 @@ Read the applicable layer contracts:
   for resources/forms;
 - [query cache](../carta-module-development/references/web-query-cache.md) for
   changed reads/invalidation;
+- [file routing](../web-ui-surfaces/references/file-routing.md) for changed route
+  structure, tabs, Back targets, or page lifetime;
 - `$api-conventions`, `$web-ui-surfaces` and `$build-resource-form` for their layers.
+
+Check whether each added layer owns behavior: a service owns a transaction or
+business operation; an adapter owns a boundary; a type adds a contract that
+inference cannot express. Report forwarding wrappers, duplicate state and
+repeated validation where direct use preserves the required behavior.
 
 ## Evaluate evidence
 
