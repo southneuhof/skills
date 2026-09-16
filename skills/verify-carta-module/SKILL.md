@@ -39,6 +39,12 @@ a manual journey. Report rendered behavior as unverified. Check:
 - Is the development preview prepared, with migration/seed status and URL?
 
 Source review does not prove actual rendered behavior.
+For every new or changed interaction, record the selected framework components,
+required input wiring, action owner and route targets in the existing review.
+Resolve named route targets against the actual generated routes. Check custom
+forms against `$build-resource-form`, including uploads and contextual actions.
+Passing type checks or unrelated tests does not replace this review. Unsupported
+control substitutions and missing route targets require `REWORK`.
 
 ## Trace material boundaries
 
@@ -63,9 +69,6 @@ Missing E2E is not a defect. Apply
 before requesting more tests. Reuse framework behavior and sufficient module
 proof. Tests that replace a schema/control cannot prove that replaced boundary.
 
-For generated work, apply the
-[generated-evidence limits](../carta-module-development/references/verification-strategy.md#commands-and-environment).
-Inspect current source, not equality with a template.
 Rerun only affected checks when evidence is stale, failed, missing or insufficient.
 
 Only the full process requires inventory/worksheet consistency, using API/UNIT

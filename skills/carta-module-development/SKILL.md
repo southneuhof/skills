@@ -25,13 +25,14 @@ implementation planning. Use the full design/plan/[worksheet](references/module-
 process only where required traceability or a consequential change needs that
 record. State its scope; keep unaffected work in the existing record.
 
-On resume, reuse current decisions and evidence in the selected process.
+On resume, reuse current decisions, approval and evidence in the selected process.
 Explicit user-required processes still apply.
 
-A build request authorizes normal in-scope implementation and repairs, not new
-product decisions or unrestricted writes. Design-only and plan-only requests
-stop at their requested deliverable. Ask only for a material missing decision
-or authority; do not reopen clear requirements because an example differs.
+A build request authorizes design work. Implementation authority begins only
+after the [design approval gate](references/standard-module.md#design-approval-gate).
+Design-only and plan-only requests stop at their requested deliverable. Ask only
+for a material missing decision or authority; do not reopen clear requirements
+because an example differs.
 
 ## Discovery reuse
 
@@ -60,20 +61,21 @@ Reuse the answer; read its source again only for an unresolved detail or change.
 ## Build and finish
 
 Use [execution](references/execution.md) for implementation, early preview and
-review. Keep one executor for connected work. Prefer
-[bounded generation](references/bounded.md) for supported standard actions when
-it saves work and emits no browser tests. Otherwise use normal source edits.
-Generation is optional and does not change the requested scope.
+review. Keep one executor for connected work. Implement the module with normal
+source edits and the repository's existing framework patterns.
 
 Use [verification strategy](references/verification-strategy.md) for checks and
 evidence. Use `$verify-carta-module` for final review. Finish when the requested
 result works, required checks are sufficient, and the work record reports the
 development preview, migration/seed status and any remaining gaps.
+Record the review verdict before reporting completion. A pending required
+review leaves the work in `verifying`, including after a repair.
 
 ## Layer contracts
 
 - Use `$api-conventions` for API edits and `$web-ui-surfaces` for web surfaces.
-- Use `$build-resource-form` for forms. For a relation, read the complete
+- Before selecting controls for any user input, use `$build-resource-form`.
+  This includes custom actions, playgrounds and inline uploads. For a relation, read the complete
   [display and form pattern](../web-ui-surfaces/references/fields.md), not just
   the lookup configuration.
 - Read [cross-layer contracts](references/contract-rules.md) for changed boundaries.

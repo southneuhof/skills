@@ -15,8 +15,10 @@ new product scope, or implement source changes.
 Start with the [standard module base](../carta-module-development/references/standard-module.md),
 including custom workflows added to it.
 Add exact owners, work order, setup and suitable checks to the existing work
-record. The original request and decisions can establish approval. Keep the
-plan in the standard design record without creating
+record. Confirm that the standard design approval gate records the user's
+approval of this exact revision. If it does not, return to `$carta-module-design`,
+present the design and stop for approval before planning. Keep the plan in the
+standard design record without creating
 numbered plans, a worksheet or UI JSON. A plan-only request stops there.
 Use the remaining procedure only for a scoped full contract or an existing full
 plan. A custom action alone does not require it. Include workflow restrictions
@@ -35,10 +37,6 @@ changes. Module delivery uses non-browser Vitest, type checking and linting; sel
 appropriate checks rather than asking the user to choose a testing stack.
 Resolve exact commands from this checkout and distinguish script inspection
 from a successful execution.
-
-Use the [generation contract](../carta-module-development/references/bounded.md)
-only when a scaffold saves work. If selected, record the preview and manual
-owners. Otherwise plan normal edits without a manifest.
 
 Technical discovery ends when each requested action has an exact owner, a
 supported implementation path or named gap, and a suitable check. Record each
@@ -94,7 +92,7 @@ not a transcript or repeated copy of the design in each file.
 Use the [worksheet contract](../carta-module-development/references/module-execution-worksheet.md)
 for the dependency/status index and acceptance ownership. Map every acceptance
 ID to a primary plan and its required evidence surfaces there. Keep acceptance
-test mappings only in the worksheet. Exclude E2E generation, execution and browser
+test mappings only in the worksheet. Exclude E2E work and browser
 journey mappings, including on resume. Exact tests can remain `PENDING`
 until the executor returns them for the parent to merge. Use
 [verification strategy](../carta-module-development/references/verification-strategy.md)
@@ -120,8 +118,7 @@ implementation is not itself a new design conflict. Refresh technical details
 when behavior is unchanged. Escalate only material scope, interface or authority
 changes.
 
-Return the plan/index paths, design revision, execution order, coverage and
-blockers. A planning-only request ends here. For an already authorized module
-implementation, return to `$carta-module-development` without inventing another
-approval ceremony. New material decisions and additional write authority still
-require user approval.
+Return the plan/index paths, approved design revision, execution order, coverage
+and blockers. A planning-only request ends here. For a module whose exact design
+revision passed the approval gate, return to `$carta-module-development`.
+New material decisions and additional write authority require user approval.
