@@ -1,6 +1,6 @@
 ---
 name: build-resource-form
-description: Build or review Carta form values, validation, relation sources, dependent inputs, custom fields, and child writes.
+description: Build or review Carta form values, validation, relation sources, dependent inputs, custom action inputs, custom fields, inline uploads, and child writes.
 ---
 
 # Build resource forms
@@ -93,7 +93,7 @@ Report a failed write separately from a failed refresh after a successful write.
 ## Configure relation sources
 
 For each new or changed relation, use the
-[complete display/form pattern](../web-ui-surfaces/references/fields.md).
+[display and form pattern](../web-ui-surfaces/references/fields.md).
 Complete its API display data and list/detail projection with the form, rather
 than leaving display work for a later assignment.
 
