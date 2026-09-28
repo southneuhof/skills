@@ -19,7 +19,7 @@ the request; an agent-written design cannot override explicit requirements.
 
 Use the [standard module base](../carta-module-development/references/standard-module.md),
 including custom workflows added to it.
-Missing worksheet, IDs, UI JSON or recorder JSON is not a defect.
+Standard work needs no worksheet, IDs, UI JSON or recorder JSON.
 For a scope with a full contract, read the
 [module contract](../carta-module-design/references/module-contract.md) and
 [worksheet contract](../carta-module-development/references/module-execution-worksheet.md).
@@ -61,6 +61,11 @@ including standard Views and custom actions. Compare composition with
 fields. A missing component import, raw asset JSON, a raw state code, or an unsupported custom
 control requires `REWORK`. An unexplained difference from the app design also
 requires `REWORK`; a passing static check does not approve that difference.
+Check resource declarations against the
+[current architecture](../../../docs/resource_system_overhaul/ARCHITECTURE.md):
+raw operation schemas, independent surface definitions, static list/create
+bags, and identity-bound detail/update bags. Run the source checker when the
+resource changed.
 Check scope, unrelated work and unauthorized writes. Existing example code is
 not justification for overriding the request or copying an unnecessary control.
 
@@ -76,8 +81,10 @@ proof. Tests that replace a schema/control cannot prove that replaced boundary.
 Rerun only affected checks when evidence is stale, failed, missing or insufficient.
 
 Only the full process requires inventory/worksheet consistency, using API/UNIT
-evidence without browser mappings or reports. Run the UI contract checker when a contract exists or custom
-composition needs that check; standard work needs no new JSON solely for review.
+evidence without browser mappings or reports. For changed web surfaces in the
+full process, check the UI contract required by `$carta-module-plan`. Also run
+the checker when a contract exists or custom composition needs it; standard
+Views need no new JSON solely for review.
 Static checks cannot establish semantic acceptance or runtime freshness.
 For external integrations, apply the shared
 [external integration checks](../carta-module-development/references/verification-strategy.md#external-integrations).

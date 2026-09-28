@@ -6,9 +6,11 @@ this reference covers the web/API connection.
 
 ## Standard transport
 
-Use `createHonoResourceActions(rpc.<owner>)`. It owns query serialization,
-identity, cancellation, and response normalization. Check its current typed
-route shape in `apps/web/src/framework/hono` before changing an endpoint.
+For a standard list, bind its raw Collection query schema to the existing
+adapter: `createHonoResourceActions(rpc.<owner>, { querySchema })`. The adapter
+owns query validation and encoding, identity, cancellation, and response
+normalization. Bind its list loader directly to the resource table. Check the
+typed route shape in `apps/web/src/framework/hono` before changing an endpoint.
 Do not add another data adapter argument or hand-written CRUD transport.
 
 Expose only the actions the app needs. A read schema includes the labels and
@@ -40,8 +42,8 @@ For uploads, read the shared
 [asset contract](../../carta-module-development/references/frontend-field-contract.md#asset-fields).
 The server validates ownership and use. Test the real form schema and submit
 boundary: capture the request object, pass it to the API write schema, and check
-the stored identity. Keep form parsing, field writers and serialization real in
-this check; a direct call to a mocked action cannot prove this boundary.
+the stored identity. Keep schema parsing and serialization real in this check;
+a direct call to a mocked action cannot prove this boundary.
 
 Keep a multi-row operation atomic when partial success would violate the task.
 Use a distinct custom action schema when input, permission, or state transition

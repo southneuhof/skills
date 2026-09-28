@@ -1,105 +1,60 @@
-# Web query cache convention (TanStack via framework)
+# Query and mutation contract
 
-The web app caches server data through the framework's query runtime
-(`packages/loom/src/query/`, TanStack Query under the hood). One
-client is installed per app by the framework plugin.
-Application code never creates clients or authors raw query keys.
+Read for custom reads, submit overrides, or writes that affect other resources.
+Loom owns the query client and resource cache keys.
 
-## Rules
+## Reads and queries
 
-- **Never fetch naively.** No bare `await action.run(...)` inside `onMounted`,
-  no `ref` + manual reload functions. Every server read goes through a cached
-  loader or a framework surface (`ListView`, `Detail`, `Table`, `TreeTable`
-  with `load`).
-- **Standard resource methods, not `.actions`.** `defineResource` exposes
-  `list()`, `detail()`, `create()`, `update()`, `delete()` as direct resource
-  methods. `resource.actions` holds only custom actions (e.g. `loadTree`);
-  custom actions must be declared in `defineResource`'s `actions` block to
-  exist. `resource.actions.list` is `undefined` — a real crash seen in review.
-- **Mutations invalidate automatically — mostly.** The standard wrappers
-  (`resource.create/update/delete(...).run`) call `invalidate()` internally:
-  create without id, update/delete with `{ id }`. Add invalidation only when a mutation bypasses the wrappers (a custom action)
-  or affects another resource. Await each affected resource invalidation; avoid
-  repeating the standard wrapper refresh.
-  Invalidate without `{ id }` also refreshes custom-namespaced collections of
-  that resource (they live under the `[resource, 'list']` key segment).
-- **One loader per logical dataset**, keyed by the exported key helpers.
-- **`data` XOR `load`.** `useLoader` throws when both are supplied.
+Standard Views and extracted primitive bags own loading. Bind `resource.list`
+and `resource.create` directly; bind `resource.detail({ id })` and
+`resource.update({ id })` for record pages. Their loaders remain in the nested
+`table`, `detail`, or `form` bag. An update-only page needs no display operation.
 
-## Key helper choice
+For standard Hono lists, pass the module's raw query schema to
+`createHonoResourceActions(endpoint, { querySchema })`, then bind `api.list`
+directly. The adapter validates and encodes the collection query once. Do not
+also assign that schema to the resource table. Standalone tables may own query
+validation when their loader does not. Use frontend `sort_by` and `sort`;
+the transport owns wire names. Preserve endpoint-specific sort keys, filters,
+search parameters, and cancellation.
 
-Use the action's own `namespace` for standard reads (a `list()` factory's
-namespace defaults to the resource key). For custom collections use
-`resource.key` plus an explicit distinct `namespace` so they never collide with
-the standard list entry.
+Use `collectionKey` or `recordKey` with `useLoader` only when no existing surface
+owns the custom data set. Include every result-changing query and parent input
+in both key and request context. Use a distinct namespace for another logical
+collection. Keep changing inputs reactive and use `enabled` until required inputs
+exist. Choose either `data` or `load`.
 
-## Pattern: plain list outside a surface
+Current owners: [Hono actions](../../../../apps/web/src/framework/hono/actions.ts),
+[query contract examples](../../../../apps/web/src/framework/__type-tests__/plan068-query-ownership.type-test.ts),
+and [Loom query API](../../../../packages/loom/src/query/index.ts).
 
-```ts
-import { computed } from 'vue'
-import { collectionKey, useLoader } from '@southneuhof/loom'
+## Writes and commands
 
-const list = divisions.list()
-const query = { page: 1, limit: 100 }
-const loader = useLoader({
-  key: collectionKey({ resource: list.namespace, query, searchParameters: {} }),
-  context: { query, searchParameters: {} },
-  load: list.run,
-})
-const items = computed(() => loader.data.value?.data ?? [])
-```
+Resource-bound form submit owns access and mutation invalidation. Create/update
+results must contain the declared identity; an update result must identify the
+bound target. Use the resource identity shape for routes, writes, and keyed
+invalidation. Use `invalidate()` for the whole resource.
 
-List runs return a `CollectionResult`: read `.data`. No `onMounted` — the
-loader fetches on mount.
+Custom commands live under `resource.actions`. `run` and `can` receive exactly
+the business arguments. Attach row policy with `withContext({ record })`;
+it does not change that tuple. Explicit `permission: null` still permits row
+policy checks. The server remains responsible for current authorization.
 
-## Pattern: single record
+The binder invalidates its own resource after a successful write. Refresh other
+affected resources after success, awaiting their `invalidate({ id })` or
+`invalidate()` as needed. Keep later refresh work separate from the write, using
+`submitted` or the supported page completion hook. Report refresh failure as
+stale data; do not repeat the successful write.
 
-Use the current owning resource's detail contract (the names below are illustrative):
+## Submit overrides and failures
 
-```ts
-const detail = records.detail({ id: recordId })
-const loaded = useLoader({
-  key: recordKey({ resource: detail.namespace, id: detail.id, searchParameters: detail.searchParameters }),
-  context: { id: detail.id, searchParameters: detail.searchParameters },
-  load: detail.run,
-})
-```
+`<Form v-bind="bound.form" :submit="replacement" />` replaces the guarded
+function. The replacement does not inherit its access checks or invalidation.
+Prefer the bound submit. When an override is required, explicitly preserve the
+required policy and refresh ownership in the replacement operation.
 
-## Pattern: per-selection cache (ChipFilter tabs)
-
-Make the key and context reactive. The cache keeps one entry per selection:
-
-```ts
-const treeLoader = useLoader({
-  key: computed(() => collectionKey({
-    resource: resource.key,
-    namespace: 'tree',
-    query: { businessCategoryId: selected.value ?? '' },
-    searchParameters: {},
-  })),
-  context: computed(() => ({ searchParameters: {}, businessCategoryId: selected.value ?? '' })),
-  enabled: computed(() => Boolean(selected.value)),
-  load: (context: { searchParameters: Record<string, unknown>; businessCategoryId: string }) =>
-    resource.actions.loadTree.run(context.businessCategoryId),
-})
-const nodes = computed(() => treeLoader.data.value?.categories ?? [])
-```
-
-The selection is folded into the key (stable serialization), so switching back
-and forth between already-visited selections serves from cache within
-`staleTime`; afterwards TanStack refetches in the background on remount.
-`enabled` gates loaders whose inputs start empty; `loading` is false while
-gated.
-
-Exports from `@southneuhof/loom`: `useLoader`, `collectionKey`,
-`recordKey`. `useLoader` accepts `key`, `context`, `load`, optional `enabled`
-and `data`; returns `data`, `loading`, `error`, `refresh`. `error` is a
-normalized `SubmitError` (`message`).
-
-## Checklist
-
-- [ ] Every server read uses `useLoader` (+ key helper) or a framework surface.
-- [ ] No `.actions.list`-style access to standard CRUD; custom actions declared in `defineResource`.
-- [ ] Standard mutations rely on wrapper invalidation; custom-action mutations end with `resource.invalidate()`.
-- [ ] Per-selection datasets encode the selection in the query key with a distinct `namespace`.
-- [ ] `enabled` gates loaders whose inputs start empty; never pass both `data` and `load`.
+`RESOURCE_RESULT_INVALID` means the write may have completed but returned an
+invalid identity. The binder invalidates affected caches and reports a
+non-retryable error. Do not fabricate an identity, claim rollback, or submit
+again automatically. Apply the same write/refresh distinction to post-write
+invalidation failures.

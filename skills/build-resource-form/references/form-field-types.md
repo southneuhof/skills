@@ -3,13 +3,14 @@
 Read `docs/ui/forms.md` first. It owns the field implementation decision. Use
 this manifest to identify the registered renderer or composite selected by that
 decision.
-The live renderer keys and app adapters are in:
+The live renderer keys and public component contracts are in:
 
 - `packages/loom/src/renderers/form.ts`
-- `apps/web/src/framework/inputs/registry.ts`
+- `packages/loom/src/renderers/formContracts.ts`
 
-Use an input catalog if the app has one. The source files are authoritative when this manifest and the runtime differ.
-Do not create a second renderer list in application code.
+Use component props directly. Every authored input needs an explicit renderer.
+The schema validates values and requiredness; it does not choose a renderer or
+create choices.
 
 ## Text and numeric values
 
@@ -30,19 +31,32 @@ Use `text` with a native `type` only when the form contract still owns a string.
 
 | Renderer | Use it for | Value and common props |
 | --- | --- | --- |
-| `select` | A compact closed choice set | scalar or array; `source`, `pick`, `view`, `multi`, `searchable`, `clearable` |
-| `radio` | A small exclusive set that must stay visible | scalar; `source`, `pick`, `view`, `variant`, `direction` |
+| `select` | A compact closed choice set | scalar or array; `load`, optional `resource` and `namespace`, or static `data`; `pick`, `view`, `multi`, `searchable`, `clearable` |
+| `radio` | A small exclusive set that must stay visible | scalar; `load`, optional `resource` and `namespace`, or static `data`; `pick`, `view`, `variant`, `direction` |
 | `checkbox` | One boolean agreement or flag | boolean; `required` |
 | `switch` | One on/off value | boolean; `required` |
-| `checkbox-group` | A small visible multi-choice set | array; `source`, `pick`, `view`, `searchParameters` |
-| `lookup` | A searchable database-backed relation | scalar ID or code; owner resource `source`, `pick`, `view`, `searchParameters` |
+| `checkbox-group` | A small visible multi-choice set | selected record array; `load`, optional `resource` and `namespace`, or static `data`; `pick`, `view`, `searchParameters` |
+| `lookup` | A searchable database-backed relation | scalar identity; `load`, optional `namespace`, and `loadDetail`; `table`, `pick`, `view`, `searchParameters` |
 
-Use a static source only for a small closed set owned by the form contract. Use
-`lookup` for database rows and parent-filtered relations. The owner resource
-must expose `list` and `detail`, and both actions must return the selected
-identity and label. A multi lookup or select uses `selectionValues(exactItemSchema)` and keeps the
-selected record array. A switch inside a form edits the draft; it does not
-write immediately unless that interaction is explicitly implemented.
+Use static `data` props only for a small closed set. Put loaders and other
+component props inside the field's `props` object. For database-backed options,
+pass the owner's loader and resource key:
+
+```ts
+props: {
+  load: roles.list.table.load,
+  resource: roles.list.table.resource,
+  namespace: roles.list.table.namespace,
+}
+```
+
+The resource owns option invalidation. A standalone loader can omit `resource`.
+For lookup, add `loadDetail(context)` using the owner's detail loader and pass
+its own table definition as `props.table`. Keep filters in `searchParameters`.
+The raw form schema defines accepted multi-selection values and any transform
+to operation input; the users form accepts role records and transforms them to
+IDs. A switch inside a form edits the draft; it does not write immediately
+unless that interaction is explicitly implemented.
 
 ## Date and time values
 
@@ -54,8 +68,8 @@ write immediately unless that interaction is explicitly implemented.
 | `year` | One year | number or year string; `required` |
 | `time` | One time of day | time string; native time props |
 
-Match the API schema to the value emitted by the input. Add `form.write` only
-when the API contract uses another representation.
+Match the form schema to the value emitted by the input. Use a schema transform
+when the submitted output needs another representation.
 
 ## Assets, location, and drawing values
 
@@ -71,18 +85,19 @@ when the API contract uses another representation.
 For file/image values, read the shared
 [asset contract](../../carta-module-development/references/frontend-field-contract.md#asset-fields),
 including current framework limits.
-Location inputs use the app location operations. Use one `form.write` on the
-owning field only when the API location shape differs from the control shape.
+Location inputs use the app location operations. Use the form schema when the
+submitted API shape differs from the control shape.
 
 ## Structured and layout values
 
 | Renderer | Use it for | Value and required configuration |
 | --- | --- | --- |
-| `table` | An array of form-owned rows | row object array; `fields`, `form`, `table`, optional `rowKey` and reorder props |
+| `table` | An array of form-owned rows | row object array; `table`, `form`, required `toDraft`, optional `rowKey` and reorder props |
 | `separator` | A labelled section break in a form | no submitted value; label and layout props |
 
-Use `table` and its row field catalog before you build manual repeatable rows.
-A row lookup `view` covers the selection dialog only. Define the row cell
-through [display and form pattern](../../web-ui-surfaces/references/fields.md).
+Use `TableInput` with separate `defineTable` and submit-free `defineForm` row
+definitions before you build manual repeatable rows. Always supply `toDraft`
+to map a table row into form input. A row lookup `view` covers the selection dialog only. Define
+the row cell through [display and form pattern](../../web-ui-surfaces/references/fields.md).
 Use a separate child resource when rows need their own permissions, paging, or
 actions.
