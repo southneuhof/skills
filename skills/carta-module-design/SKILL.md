@@ -1,75 +1,43 @@
 ---
 name: carta-module-design
-description: Design or revise a Carta module when business behavior, application context, or acceptance requirements need to be established.
+description: Define Carta module behavior for explicit user approval.
 ---
 
 # Carta module design
 
-Use [Carta module terms](../../../CONTEXT.md) for module ownership language.
+## Discover
 
-Resolve requested behavior without inventing business rules. This skill writes
-the design; it does not edit application source or grant new write authority.
+Inspect affected code and supplied sources before asking business questions.
+Code establishes current behavior, not intended policy. Use [CONTEXT.md](../../../CONTEXT.md)
+for terms. Learn unfamiliar workflows through concrete cases; leave routine
+technical choices to delivery.
 
-## Establish the starting point
+## Write
 
-Read the request, later decisions, supplied references, and existing work.
-Separate current behavior from the intended change. A complete supplied design
-needs a readiness review, not another interview. Preserve valid decisions and
-approval; explicit requirements govern over examples and inferred defaults.
+Use the [template](assets/design-template.md) in the existing design record or
+`plans/<feature>/design.md`. Keep its four sections and order. List every new
+or changed field. Describe branches by trigger, result, and next step; ordinary
+CRUD can reference standard behavior.
 
-Use the [standard module base](../carta-module-development/references/standard-module.md)
-for process selection, record ownership, and the design approval gate. Use the
-[module contract](references/module-contract.md) for every design. Record
-findings and unknowns in that draft as they emerge.
+Functional requirements and their data and workflow rules define completion.
+Define each rule once; place reasons, examples, and unresolved choices beside
+it. Update this document directly. Keep plans and delivery notes outside it;
+use Git for history, not annexes or addenda.
 
-Apply [discovery reuse](../carta-module-development/SKILL.md#discovery-reuse).
-Use [context discovery](references/context-discovery.md) to identify the owners
-and consumers of each in-scope journey. Read [DESIGN.md](../../../DESIGN.md)
-for web composition and the
-[resource architecture](../../../docs/resource_system_overhaul/ARCHITECTURE.md)
-for supported surfaces. Record required differences from those conventions.
-Discovery is sufficient when each journey has known owners and consumers or an
-explicit gap that affects its design.
+Check feasibility against current contracts. For web work, read
+[DESIGN.md](../../../DESIGN.md) and the
+[resource architecture](../../../docs/resource_system_overhaul/ARCHITECTURE.md).
+Resolve business questions; raise known write-authority needs before approval.
 
-## Resolve material unknowns
+## Approve
 
-Use [grounded questions](references/grounded-questions.md) when a missing fact
-or decision could change behavior. Inspect repository facts yourself. Learn
-unfamiliar processes through walkthroughs and real examples before proposing
-choices. Request a redacted procedure or sample only when it resolves a gap;
-a user explanation is valid evidence too.
+- Design: `Draft` or `Approved`. Set `Approved` only after explicit user approval
+  of the current scope. Preserve approval for unchanged behavior.
+- Implementation: `Not started`, `In progress`, `Current`, or `Needs update`;
+  delivery maintains this status.
 
-Distinguish observed facts, confirmed requirements, proposals, and unknowns.
-Name conflicting sources and the behavior they affect. Resolve the next
-consequential dependency; group questions that share context. Record decisions
-with their authority in the design. Routine technical choices belong to planning.
+Material behavior changes return the design to `Draft` and an existing implementation
+to `Needs update`. Wording corrections preserve status.
 
-## Define and review behavior
-
-Write applicable contract sections. Summarize selected CRUD by resource; give
-custom rules and differences concrete acceptance outcomes. A new entity does
-not imply all operations. Define inputs, state/access conditions, visible
-results, failure effects, and affected consumers. Reference unchanged contracts
-and shared predicates instead of copying them. Reserve YAML for custom workflows
-and implementation interfaces for planning.
-
-Use the shared [verification boundary](../carta-module-development/references/verification-strategy.md#browser-journeys)
-when defining acceptance. UI requirements describe product behavior; module
-acceptance uses non-browser proof.
-
-Review the design as an implementer who has not seen the conversation. Resolve
-remaining business decisions and check source coverage and internal agreement
-under the [authority rules](references/module-contract.md#authority-and-scope).
-Label self-review unless an independent review was available and permitted.
-A heading check does not establish readiness.
-
-## Approval and handoff
-
-Apply the standard module's design approval gate to the exact ready revision.
-Reuse approval for unchanged scope. Unresolved material decisions leave the
-affected design `DRAFT` or `BLOCKED` unless the user excludes that behavior.
-Routine visual and technical choices need no separate gate.
-
-Return the design path, revision, approval source, evidence, review result, and
-blockers. A design-only request ends at its deliverable. For authorized planning,
-continue with `$carta-module-plan` or return to the requesting workflow.
+End design-only requests here. Continue authorized builds with
+[$carta-module-development](../carta-module-development/SKILL.md) after approval.
