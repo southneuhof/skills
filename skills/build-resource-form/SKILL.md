@@ -5,19 +5,28 @@ description: Build or review Carta forms, value conversion, relation sources, an
 
 # Build resource forms
 
-Read [DESIGN.md](../../../DESIGN.md) for layout. Use the [form guide](../../../docs/ui/forms.md)
-for controls and composition, and the [value contract](../../../docs/resource_system_overhaul/ARCHITECTURE.md#4-schemas-and-value-ownership)
-for drafts, defaults, and schema input/output. Reuse labels by business meaning
-and schema subsets by matching input/output contracts.
+Read [DESIGN.md](../../../DESIGN.md) for layout and search the
+[form renderers table](../../../packages/loom/CATALOG.md#form-renderers-defineform)
+on demand for available inputs and props. Use the [form guide](../../../docs/ui/forms.md)
+when you need detailed control composition, and consult
+[ARCHITECTURE.md](../../../docs/resource_system_overhaul/ARCHITECTURE.md#4-schemas-and-value-ownership)
+only when debugging edge-case schema draft/output behavior. Reuse labels by
+business meaning and schema subsets by matching input/output contracts.
 
 Use [custom fields](references/custom-field-contract.md) for interactions
 existing controls cannot express.
 
 Use a plain field object for static input. Use a field function when the full
 configuration depends on typed Form context or the read-only draft. Return the
-whole field configuration. Put visibility and span on the field. Put authored
-disabled state in the input props. Only `behavior.derived` remains for values
-computed from the draft.
+whole field configuration. Put visibility, span, and conditional `required`
+(when a `.superRefine()` rule makes an optional schema field dynamically
+required) on the field; ordinary requiredness is inferred from the schema,
+including `z.preprocess(...)` wrappers. Group multi-group forms with `sections`
+on `defineForm` (`{ title, description?, fields }[]`), which collapses empty
+hidden sections automatically. Put authored disabled state in the input props.
+Only `behavior.derived` remains for values computed from the draft. Inside
+`TableInput` inline rows, use `kind: 'display'` (`read`, `format`, `align`) for
+read-only or computed columns and format derived totals consistently.
 
 For file selection, imports, or preprocessing, use the existing FileInput,
 ImageInput, CameraInput, or DrawingCanvas. Omitted mode keeps stored

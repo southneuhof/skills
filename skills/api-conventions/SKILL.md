@@ -5,8 +5,10 @@ description: Build or review Carta API routes, scopes, entities, permissions, an
 
 # API conventions
 
-Use Sprindle's [reference](../../../packages/sprindle/docs/reference.md) and
-[recipes](../../../packages/sprindle/docs/recipes.md) for framework APIs.
+Use the generated [Sprindle and API catalog](../../../packages/sprindle/CATALOG.md)
+for route constructors, entity read options, `lockRow`, and shared `apps/api`
+helpers. Use Sprindle's [reference](../../../packages/sprindle/docs/reference.md)
+and [recipes](../../../packages/sprindle/docs/recipes.md) for lifecycle details.
 
 Add queries, guards, locks, retries, or abstractions only for a required rule,
 contract, or concrete defect. Reuse validation from Sprindle, schemas, shared
@@ -27,4 +29,7 @@ Define codes in `src/authorization/catalog.ts`; keep guards, resource access,
 navigation, and seed consistent.
 
 API tests migrate their target. Inspect the target guard and `.env.test.example`
-before storage checks. Session helpers live in `src/testing/session.ts`.
+before storage checks. Session helpers live in `src/testing/session.ts`. Update
+`src/__tests__/route-contract.spec.ts` when adding or removing HTTP routes, and
+run `pnpm --filter @southneuhof/api build` before full API tests because
+`production-bundle.spec.ts` verifies `dist/application.mjs`.
